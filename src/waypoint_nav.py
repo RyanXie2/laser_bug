@@ -7,11 +7,15 @@ from std_msgs.msg import String
 from math import atan2, asin, pow, sqrt, sin, cos
 from PID_controller import PIDController
 
+import rclpy
+from rclpy.node import Node
+from pub_sub import MinimalPublisher
+
 
 class Robot_nav(Node):
 
     def __init__(self):
-        super().__init__('minimal_publisher')
+        super().__init__('robot_nav')
         self.control_pub_ = self.create_publisher(Twist, '/cmd_vel', 10)
         # self.goal_pub_ = self.create_publisher(String, '/waypoints', 10)
         self.odom_sub = self.create_subscription(
@@ -28,8 +32,10 @@ class Robot_nav(Node):
         self.odom_sub  # prevent unused variable warning
         self.goal_sub  # prevent unused variable warning
         
-        self.SteerController = PIDController(0.8, 0.001, 0.1)
-        self.ThrustController = PIDController(0.4, 0.01, 0.05)
+        self.SteerController = PIDController(0.9, 0.002, 0.1)
+        self.ThrustController = PIDController(1.0, 0.001, 0.2)
+        
+        
         
         timer_period = 0.5  # seconds
         self.current_goal = Point() 
@@ -81,22 +87,35 @@ class Robot_nav(Node):
     def control_timer_callback(self):
         speed = Twist()
         angle_error = self.cal_angle_to_goal() - self.theta
+        # angle_error = 3.14159 - self.theta
         angle_error = atan2(sin(angle_error), cos(angle_error))
         dis_error = self.cal_dis_to_goal()
-        print("Robot current position: {:.2f}, {:.2f}".format(self.x, self.y))
-        if abs(angle_error) > 0.1:
+        # print("Robot current position: {:.2f}, {:.2f}".format(self.x, self.y))
+        # print("angle error: ", angle_error)
+        
+        # if abs(angle_error) > 0.05:
+        #     speed.angular.z = self.SteerController.step(angle_error, 0.5)
+        #     speed.linear.x = 0.0
+        #     print("angle error: ", angle_error)
+            
+        if abs(dis_error) > 0.01:
+            print("angle error: ", angle_error)
+            print("dis error" , dis_error)
             speed.angular.z = self.SteerController.step(angle_error, 0.5)
-            speed.linear.x = 0.0
-        elif abs(dis_error) > 0.01:
-            speed.angular.z = self.SteerController.step(angle_error, 0.5)
-            speed.linear.x = self.ThrustController.step(dis_error, 0.5)
+            speed_temp = self.ThrustController.step(dis_error, 0.5)
+            # print("speed temp: ", speed_temp)
+            if speed_temp > 0.2:
+                speed_temp = 0.2
+                
+            speed.linear.x = speed_temp
         else:
+            print("finished")
             speed.angular.z = 0.0
             speed.linear.x = 0.0
-            if self.i < 3:
-                self.i += 1
-            else:
-                print("You finished all the goals!!!")
+            # if self.i < 3:
+            #     self.i += 1
+            # else:
+            #     print("You finished all the goals!!!")
                 # exit()
         self.control_pub_.publish(speed)
 
@@ -120,8 +139,8 @@ class Robot_nav(Node):
         for goal in goals_raw:
             goal = goal.strip("[]")
             temp_point = Point()
-            temp_point.x = abs(float(goal.split(",")[0])/100)
-            temp_point.y = abs(float(goal.split(",")[1])/100)
+            temp_point.x = float(goal.split(",")[0])/100
+            temp_point.y = float(goal.split(",")[1])/100
             self.goals_list.append(temp_point)
         if len(self.goals_list) != 0:
             self.current_goal = self.goals_list[self.i]

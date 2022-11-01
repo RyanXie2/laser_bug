@@ -14,16 +14,22 @@
 
 import rclpy
 from rclpy.node import Node
+from nav_msgs.msg import Odometry
 
 from std_msgs.msg import String
 
 
 class MinimalPublisher(Node):
 
-    def __init__(self):
+    def __init__(self,name=None):
         super().__init__('minimal_publisher')
+        
         self.wpoints = 'wpoint not set'
-        self.publisher_ = self.create_publisher(String, 'waypoints', 10)
+        if name == "rpos":
+            self.publisher_ = self.create_publisher(String,'robotposition',10)
+        else:
+            self.publisher_ = self.create_publisher(String, 'waypoints', 10)
+        
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
@@ -37,15 +43,28 @@ class MinimalPublisher(Node):
 
 class MinimalSubscriber(Node):
 
-    def __init__(self):
+    def __init__(self, name = None):
         super().__init__('minimal_subscriber')
         self.subscription = self.create_subscription(
-            String,
-            'waypoints',
-            self.listener_callback,
-            10)
+                String,
+                'waypoints',
+                self.listener_callback,
+                10)
         self.subscription  # prevent unused variable warning
-        self.wpoints
+        self.wpoints = ""
 
     def listener_callback(self, msg):
         self.wpoints = msg.data
+        
+class RobPosSubscriber(Node):
+
+    def __init__(self, name = None):
+        super().__init__('robot_pos_subscriber')
+        self.subscription = self.create_subscription(Odometry,'odom',self.listener_callback,10)
+        self.subscription  # prevent unused variable warning
+        self.x = 0
+        self.y = 0
+
+    def listener_callback(self, msg):
+        self.x = msg.pose.pose.position.x * 100
+        self.y = msg.pose.pose.position.y * 100

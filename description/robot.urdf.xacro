@@ -5,4 +5,9 @@
     <xacro:include filename="gazebo_control.xacro" />
     <xacro:include filename="lidar.xacro" />
     
+    <!-- <xacro:laser_bug parent="world">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:laser_bug> -->
+
+  <!-- <xacro:mx_ros_2_control name="mx_ros_2_control" /> -->
 </robot>

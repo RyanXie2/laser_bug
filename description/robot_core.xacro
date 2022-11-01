@@ -19,10 +19,25 @@
         <color rgba="0 0 0 1"/>
     </material>
 
+
+      <!-- ROBOT BASE FOOTPRINT -->
+    <!-- Define the center of the main robot chassis projected on the ground -->	
+    <!-- <link name="base_footprint" > </link> -->
+
+    <!-- The base footprint of the robot is located underneath the chassis -->
+    <!-- <joint name="base_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link" />
+        <origin xyz="0.0 0.0 0.02" rpy="0 0 0"/>
+    </joint> -->
+
+
     <!-- BASE LINK -->
 
     <link name="base_link">
-
+        <!-- <visual>
+            <origin xyz="0.0 0.0 0.0"/>
+        </visual> -->
     </link>
 
 

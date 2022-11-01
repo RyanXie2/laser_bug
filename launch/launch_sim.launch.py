@@ -60,6 +60,6 @@ def generate_launch_description():
         rsp,
         gazebo,
         spawn_entity,
-        diff_drive_spawner,
-        joint_broad_spawner
+        # diff_drive_spawner,
+        # joint_broad_spawner
     ])

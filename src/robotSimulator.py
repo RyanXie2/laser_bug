@@ -98,7 +98,7 @@ class RobotSimulatorApp( JoyApp ):
     s.bind(("",0))
     self.sock = s
     # Set up the sensor receiver plan
-    self.sensor = SensorPlanTCP(self,server=self.srvAddr[0],port=self.srvAddr[1])
+    self.sensor = SensorPlanTCP(self,server="141.213.30.33",port=self.srvAddr[1])
     self.sensor.start()
     self.timeForStatus = self.onceEvery(1)
     self.timeForLaser = self.onceEvery(1/15.0)
@@ -132,6 +132,7 @@ class RobotSimulatorApp( JoyApp ):
     self.robSim.refreshState()
     # Get the simulated tag message
     msg = self.robSim.getTagMsg()
+    print(msg.encode("ascii"))
     # Send message to waypointServer "as if" we were tagStreamer
     self.sock.sendto(msg.encode("ascii"), (self.srvAddr[0],APRIL_DATA_PORT))
 
@@ -170,10 +171,8 @@ class RobotSimulatorApp( JoyApp ):
       self.robSim.logLaserValue(self.now)
     # update the robot and simulate the tagStreamer
     if self.timeForFrame():
-      self.emitTagMessage()
+      # self.emitTagMessage()
       ts,w = self.sensor.lastWaypoints
-      print(str(w))
-      self.sensor.lastWaypoints
       rclpy.init()
 
       mpub = MinimalPublisher()
